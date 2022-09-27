@@ -10,13 +10,6 @@ let
   additions =
     [] : List Package
 
-let overrides = [
-    {
-       name = "Itertools",
-       version = "main",
-       repo = "https://github.com/NatLabs/Itertools.mo",
-       dependencies = ["base"] : List Text
-    }
-] : List Package
+let overrides = [] : List Package
 
 in  aviate_labs # vessel_package_set # overrides
