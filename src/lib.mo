@@ -77,34 +77,35 @@ module{
     };
 
     public func entries<K, V>(self : StableTrieMap<K, V>) : Iter.Iter<(K, V)> {
-      object {
-        var stack = ?(self.trie, null) : List.List<Trie.Trie<K, V>>;
-        public func next() : ?(K, V) {
-          switch stack {
-            case null { null };
-            case (?(trie, stack2)) {
-              switch trie {
-                case (#empty) {
-                  stack := stack2;
-                  next()
-                };
-                case (#leaf({keyvals = null})) {
-                  stack := stack2;
-                  next()
-                };
-                case (#leaf({size = c; keyvals = ?((k, v), kvs)})) {
-                  stack := ?(#leaf({size=c-1; keyvals=kvs}), stack2);
-                  ?(k.key, v)
-                };
-                case (#branch(br)) {
-                  stack := ?(br.left, ?(br.right, stack2));
-                  next()
-                };
-              }
+        object {
+            var stack = ?(self.trie, null) : List.List<Trie.Trie<K, V>>;
+            
+            public func next() : ?(K, V) {
+                switch stack {
+                    case null { null };
+                    case (?(trie, stack2)) {
+                        switch trie {
+                            case (#empty) {
+                                stack := stack2;
+                                next()
+                            };
+                            case (#leaf({keyvals = null})) {
+                                stack := stack2;
+                                next()
+                            };
+                            case (#leaf({size = c; keyvals = ?((k, v), kvs)})) {
+                                stack := ?(#leaf({size=c-1; keyvals=kvs}), stack2);
+                                ?(k.key, v)
+                            };
+                            case (#branch(br)) {
+                                stack := ?(br.left, ?(br.right, stack2));
+                                next()
+                            };
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     };
 
     public func keys<K, V>(self : StableTrieMap<K, V>)  : Iter.Iter<K>{
@@ -115,20 +116,6 @@ module{
         Iter.map<(K, V), V>(entries(self), func((_, val)){ val })
     };
 
-    public func clone<K, V>(self : StableTrieMap<K, V>) : StableTrieMap<K, V>{
-        {
-            var trie = self.trie;
-            var _size = self._size;
-            isEq = self.isEq;
-            hashFn = self.hashFn;
-        }
-    };
-
-    public func clear<K, V>(self : StableTrieMap<K, V>) {
-        self.trie := Trie.empty<K, V>();
-        self._size := 0;
-    };
-
     public func fromEntries<K, V>(_entries : Iter.Iter<(K, V)>, isEq: (K, K) -> Bool, hashFn: (K) -> Hash.Hash) : StableTrieMap<K, V>{
         let triemap = new<K, V>(isEq, hashFn);
 
@@ -137,5 +124,14 @@ module{
         };
 
         triemap
+    };
+
+    public func clone<K, V>(self : StableTrieMap<K, V>) : StableTrieMap<K, V>{
+        fromEntries(entries(self), self.isEq, self.hashFn)
+    };
+
+    public func clear<K, V>(self : StableTrieMap<K, V>) {
+        self.trie := Trie.empty<K, V>();
+        self._size := 0;
     };
 };
